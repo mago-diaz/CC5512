@@ -7,7 +7,10 @@ project(KartE C CXX)
 cmake_path(GET CMAKE_SOURCE_DIR PARENT_PATH CURRENT_DIR)
 cmake_path(GET CURRENT_DIR PARENT_PATH ROOT_DIR)
 
-add_executable(KartE "main.cpp")
+add_executable(KartE
+    "main.cpp"
+    "shader.h"
+)
 set_property(TARGET KartE PROPERTY CXX_STANDARD 20)
 target_link_libraries(KartE PRIVATE
     "${ROOT_DIR}/libs/glad/build/Release/glad.lib"
@@ -16,4 +19,5 @@ target_link_libraries(KartE PRIVATE
 target_include_directories(KartE PRIVATE
     "${ROOT_DIR}/libs/glad/source/include"
     "${ROOT_DIR}/libs/glfw/source/glfw-3.3.6/include"
+    "${ROOT_DIR}/libs/glm/source/"
 )
