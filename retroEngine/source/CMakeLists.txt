@@ -18,6 +18,6 @@ target_link_libraries(RetroE PRIVATE
 )
 target_include_directories(RetroE PRIVATE
     "${ROOT_DIR}/libs/glad/source/include"
-    "${ROOT_DIR}/libs/glfw/source/glfw-3.3.6/include"
+    "${ROOT_DIR}/libs/glfw/source/include"
     "${ROOT_DIR}/libs/glm/source/"
 )
