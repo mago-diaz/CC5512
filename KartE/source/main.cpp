@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 #include "shader.h"
@@ -14,6 +16,18 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
+
+#define PI 3.14159265
+const char *transformvertexShaderSource ="#version 330 core\n"
+    "layout (location = 0) in vec3 aPos;\n"
+    "layout (location = 1) in vec3 aColor;\n"
+    "out vec3 ourColor;\n"
+    "uniform mat4 transform;\n"
+    "void main()\n"
+    "{\n"
+    "   gl_Position = transform * vec4(aPos, 1.0);\n"
+    "   ourColor = aColor;\n"
+    "}\0";
 
 const char *vertexShaderSource ="#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
@@ -62,7 +76,7 @@ int main()
     }
 
     Shader bgShader(vertexShaderSource, fragmentShaderSource);
-    Shader chShader(vertexShaderSource, fragmentShaderSource);
+    Shader chShader(transformvertexShaderSource, fragmentShaderSource);
     Shader houseShader(vertexShaderSource, fragmentShaderSource);
 
     float bgvertices[] = {
@@ -91,10 +105,10 @@ int main()
     };
 
     float chvertices[]={
-         0.04f,  0.04f, 0.04f,  0.6f, 0.3f, 0.1f,// top right
-         0.04f,  -0.04f, 0.04f,  0.6f, 0.3f, 0.1f,// bottom right
-         -0.04f,  -0.04f, 0.04f,  0.6f, 0.3f, 0.1f,// bottom left
-         -0.04f,  0.04f, 0.04f,  0.6f, 0.3f, 0.1f,// top left 
+         0.04f,  0.04f, 0.0f,  0.6f, 0.3f, 0.1f,// top right
+         0.04f,  -0.04f, 0.0f,  0.6f, 0.3f, 0.1f,// bottom right
+         -0.04f,  -0.04f, 0.0f,  0.6f, 0.3f, 0.1f,// bottom left
+         -0.04f,  0.04f, 0.0f,  0.6f, 0.3f, 0.1f,// top left 
     };
 
     unsigned int chindices[] = {  // note that we start from 0!
@@ -166,11 +180,10 @@ int main()
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
     
-    /*glBindBuffer(GL_ARRAY_BUFFER, 0); 
-    glBindVertexArray(0); 
 
-    bgShader.use();*/
-
+    std::cout << "se ha iniciado correctamente el juego " <<std::endl;
+    float i = 0;
+    float j = 0;
     while (!glfwWindowShouldClose(window))
     {
         // input
@@ -186,17 +199,24 @@ int main()
         bgShader.use();
         glBindVertexArray(VAOs[0]); 
         glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
+
+        houseShader.use();
+        glBindVertexArray(VAOs[2]); 
+        glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
         
         chShader.use();
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(std::sin(i) * 0.8f, 0.0f, 0.0f));
+        i += 0.001;
+        unsigned int transformLoc = glGetUniformLocation(chShader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
         glBindVertexArray(VAOs[1]); 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        chShader.use();
-        glBindVertexArray(VAOs[2]); 
-        glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
-
         glfwSwapBuffers(window);
         glfwPollEvents();
+
     }
 
     glDeleteVertexArrays(3, VAOs);
