@@ -13,35 +13,75 @@ class Shader
 {
 public:
     unsigned int ID;
-
-    Shader(const char* vertexPath, const char* fragmentPath)
+    Shader()
     {
-        const char* vShaderCode = vertexPath;
-        const char * fShaderCode = fragmentPath;
-        // 2. compile shaders
+        const char *vertexShaderSource ="#version 330 core\n"
+            "layout (location = 0) in vec3 aPos;\n"
+            "layout (location = 1) in vec3 aColor;\n"
+            "out vec3 ourColor;\n"
+            "void main()\n"
+            "{\n"
+            "   gl_Position = vec4(aPos, 1.0);\n"
+            "   ourColor = aColor;\n"
+            "}\0";
+
+        const char *fragmentShaderSource = "#version 330 core\n"
+            "out vec4 FragColor;\n"
+            "in vec3 ourColor;\n"
+            "void main()\n"
+            "{\n"
+            "   FragColor = vec4(ourColor, 1.0f);\n"
+            "}\n\0";
+
         unsigned int vertex, fragment;
-        // vertex shader
+
         vertex = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex, 1, &vShaderCode, NULL);
+        glShaderSource(vertex, 1, &vertexShaderSource, NULL);
         glCompileShader(vertex);
         checkCompileErrors(vertex, "VERTEX");
-        // fragment Shader
+
         fragment = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment, 1, &fShaderCode, NULL);
+        glShaderSource(fragment, 1, &fragmentShaderSource, NULL);
         glCompileShader(fragment);
         checkCompileErrors(fragment, "FRAGMENT");
-        // if geometry shader is given, compile geometry shader
+
         ID = glCreateProgram();
         glAttachShader(ID, vertex);
         glAttachShader(ID, fragment);
         glLinkProgram(ID);
         checkCompileErrors(ID, "PROGRAM");
-        // delete the shaders as they're linked into our program now and no longer necessery
+
+        glDeleteShader(vertex);
+        glDeleteShader(fragment);
+    };
+
+    Shader(const char* vertexPath, const char* fragmentPath)
+    {
+        const char* vShaderCode = vertexPath;
+        const char * fShaderCode = fragmentPath;
+
+        unsigned int vertex, fragment;
+
+        vertex = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertex, 1, &vShaderCode, NULL);
+        glCompileShader(vertex);
+        checkCompileErrors(vertex, "VERTEX");
+
+        fragment = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragment, 1, &fShaderCode, NULL);
+        glCompileShader(fragment);
+        checkCompileErrors(fragment, "FRAGMENT");
+
+        ID = glCreateProgram();
+        glAttachShader(ID, vertex);
+        glAttachShader(ID, fragment);
+        glLinkProgram(ID);
+        checkCompileErrors(ID, "PROGRAM");
+
         glDeleteShader(vertex);
         glDeleteShader(fragment);
     }
-    // activate the shader
-    // ------------------------------------------------------------------------
+    
     void use() 
     { 
         glUseProgram(ID); 
